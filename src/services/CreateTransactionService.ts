@@ -15,12 +15,28 @@ class CreateTransactionService {
   }
 
   public execute({ title, value, type }: RequestDTO): Transaction {
-    const transaction = this.transactionsRepository.create({
-      title,
-      value,
-      type,
-    });
-    return transaction;
+    const validationIncome = this.transactionsRepository.getBalance();
+
+    if (type === 'income') {
+      const transaction = this.transactionsRepository.create({
+        title,
+        value,
+        type,
+      });
+
+      return transaction;
+    }
+    if (type === 'outcome' && value <= validationIncome.total) {
+      const transaction = this.transactionsRepository.create({
+        title,
+        value,
+        type,
+      });
+
+      return transaction;
+    }
+
+    throw Error('Your balance is not enough for this outcome');
   }
 }
 
